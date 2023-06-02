@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutterapp/Screens/home_screen.dart';
 import 'package:flutterapp/Screens/login_screen.dart';
 
 class Sidebar extends StatelessWidget {
@@ -54,7 +55,10 @@ class Sidebar extends StatelessWidget {
             title: Text('Dashboard'),
             selected: selectedItem == 'Dashboard',
             onTap: () {
-              onItemSelected('Home');
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreen()),
+              );
             },
           ),
           ListTile(

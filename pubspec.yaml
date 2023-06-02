@@ -29,7 +29,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  fl_chart: ^0.61.0
+  charts_flutter: ^0.12.0
+  fl_chart: ^0.62.0
+  horizontal_data_table: ^1.0.6+2
+
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -40,6 +43,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  google_fonts: ^2.1.0
+
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -59,3 +64,7 @@ flutter:
 
   assets:
     - images/panga.png
+    - images/hospital.png
+    - images/medical.png
+    - images/hand.png
+    - images/patient_regi.png
