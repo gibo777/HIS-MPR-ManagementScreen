@@ -16,29 +16,44 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  String _email = '';
-  String _password = '';
+  TextEditingController _usernameController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
 
-  loginPressed() async {
-    if (_email.isNotEmpty && _password.isNotEmpty) {
-      http.Response response = await AuthServices.login(_email, _password);
-      Map responseMap = jsonDecode(response.body);
-      if (response.statusCode == 200) {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (BuildContext context) => const HomeScreen(),
-            ));
-      } else {
-        errorSnackBar(context, responseMap.values.first);
-      }
+  Future<void> login() async {
+    var url = Uri.parse('http://sofia.onedoc.ph:8000/api/login');
+    var response = await http.post(url, body: {
+      'username': _usernameController.text,
+      'password': _passwordController.text,
+    });
+
+    if (response.statusCode == 200) {
+      // Successful login
+      print(json.decode(response.body));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
     } else {
-      errorSnackBar(context, 'enter all required fields');
+      // Login failed
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Login Failed'),
+            content: Text('Authentication Failed'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,9 +80,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               SizedBox(height: 30,),
               TextFormField(
-                controller: _emailController,
+                controller: _usernameController,
                 decoration: InputDecoration(
-                    hintText: 'Email',
+                    hintText: 'Username',
                     hintStyle: TextStyle(
                       color: Colors.grey,
                     ),
@@ -83,9 +98,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     )
 
                 ),
-                onChanged: (value) {
-                  _email = value;
-                },
               ),
               const SizedBox(
                 height: 15,
@@ -109,28 +121,27 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderSide: BorderSide(),
                     )
                 ),
-                onChanged: (value) {
-                  _password = value;
-                },
               ),
               const SizedBox(
                 height: 30,
               ),
 
-              RoundedButton(
-                btnText: 'LOG IN',
-                onBtnPressed: () => loginPressed(),
+              ElevatedButton(
+                onPressed: () {
+                  login();
+                },
+                child: Text('Login'),
               ),
-              SizedBox(height: 24.0,),
-              Container(
-                child: Text("Forgot Your Password?",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    )
-                ),
-              ),
+              // SizedBox(height: 24.0,),
+              // Container(
+              //   child: Text("Forgot Your Password?",
+              //       style: TextStyle(
+              //         fontSize: 12,
+              //         fontWeight: FontWeight.bold,
+              //         color: Colors.black,
+              //       )
+              //   ),
+              // ),
               SizedBox(height: 20.0,),
               Container(
                 child: Text("© One Document Corporation, CareTeQ-MPR v2",

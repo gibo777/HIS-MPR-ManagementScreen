@@ -1,43 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:flutterapp/Screens/Visits.dart';
 import 'package:flutterapp/Screens/home_screen.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:flutterapp/Screens/pricePoints.dart';
 import 'lineChart.dart';
 import 'sidebar.dart';
 
-class PatientRegi extends StatelessWidget {
-  final List<charts.Series<MonthData, String>> seriesList;
-  final bool animate;
+class PatientRegi extends StatefulWidget {
+  @override
+  _PatientRegiState createState() => _PatientRegiState();
+}
 
-  PatientRegi({required this.seriesList, required this.animate});
+class _PatientRegiState extends State<PatientRegi> {
+  List<MonthData> monthDataList = [];
 
-  factory PatientRegi.withSampleData() {
-    return PatientRegi(
-      seriesList: _createSampleData(),
-      animate: true,
-    );
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
   }
 
-  static List<charts.Series<MonthData, String>> _createSampleData() {
-    final data = [
-      MonthData('Jan', 50),
-      MonthData('Feb', 75),
-      MonthData('Mar', 100),
-      MonthData('Apr', 60),
-      MonthData('May', 80),
-      MonthData('Jun', 120),
-      MonthData('Jul', 90),
-    ];
+  Future<void> fetchData() async {
+    final response = await http.get(Uri.parse('http://sofia.onedoc.ph:8000/api/dashboard/registration'));
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
 
-    return [
-      charts.Series<MonthData, String>(
-        id: 'Patients',
-        colorFn: (_, __) => charts.Color.fromHex(code: '#4E73DF'),
-        domainFn: (MonthData monthData, _) => monthData.month,
-        measureFn: (MonthData monthData, _) => monthData.count,
-        data: data,
-      ),
-    ];
+      data['patientRegistration']['All Hospitals'].forEach((month, count) {
+        monthDataList.add(MonthData(month, int.parse(count)));
+      });
+
+      setState(() {}); // Update the UI with the fetched data
+    } else {
+      // Handle API error
+      print('API request failed with status code: ${response.statusCode}');
+    }
   }
 
   @override
@@ -60,9 +58,9 @@ class PatientRegi extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(height: 10.0,),
+            SizedBox(height: 10.0),
             Text(
-              'Registered Patients',
+              'Patient Registration',
               style: TextStyle(
                   color: Color.fromRGBO(72, 109, 218, 1),
                   fontSize: 24.0,
@@ -71,20 +69,47 @@ class PatientRegi extends StatelessWidget {
             SizedBox(height: 10.0),
             Expanded(
               child: Center(
-                child: SizedBox(
-                  height: 600.0,
-                  child: charts.BarChart(
-                    seriesList,
-                    animate: animate,
-                  ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      height: 500.0,
+                      child: monthDataList.isNotEmpty
+                          ? BarChart(seriesList: _createSampleData())
+                          : Container(), // Empty container when data is not available
+                    ),
+                    Visibility(
+                      visible: monthDataList.isEmpty, // Show loader only when data is not available
+                      child: SizedBox(
+                        width: 100, // desired width
+                        height: 100, // desired height
+                        child: CircularProgressIndicator(
+                          strokeWidth: 10, // desired stroke width
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.blue), // desired color
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-            SizedBox(height: 10.0,),
+            SizedBox(height: 10.0),
           ],
         ),
       ),
     );
+  }
+
+  List<charts.Series<MonthData, String>> _createSampleData() {
+    return [
+      charts.Series<MonthData, String>(
+        id: 'Patients',
+        colorFn: (_, __) => charts.Color.fromHex(code: '#4E73DF'),
+        domainFn: (MonthData monthData, _) => monthData.month,
+        measureFn: (MonthData monthData, _) => monthData.count,
+        data: monthDataList,
+      ),
+    ];
   }
 }
 
@@ -93,6 +118,20 @@ class MonthData {
   final int count;
 
   MonthData(this.month, this.count);
+}
+
+class BarChart extends StatelessWidget {
+  final List<charts.Series<MonthData, String>> seriesList;
+
+  BarChart({required this.seriesList});
+
+  @override
+  Widget build(BuildContext context) {
+    return charts.BarChart(
+      seriesList,
+      animate: true,
+    );
+  }
 }
 
 void main() {
@@ -107,7 +146,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: PatientRegi.withSampleData(),
+      home: PatientRegi(),
     );
   }
 }

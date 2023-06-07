@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutterapp/Screens/home_screen.dart';
 import 'package:flutterapp/Screens/login_screen.dart';
+import 'package:flutterapp/Screens/profile.dart';
+
 
 class Sidebar extends StatelessWidget {
   final String selectedItem;
@@ -69,22 +71,19 @@ class Sidebar extends StatelessWidget {
               onItemSelected('Reports');
             },
           ),
-          ListTile(
-            leading: Icon(Icons.edit),
-            title: Text('Editable'),
-            selected: selectedItem == 'Editable',
-            onTap: () {
-              onItemSelected('Editable');
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.assessment),
-            title: Text('Audit Trails'),
-            selected: selectedItem == 'AuditTrail; ',
-            onTap: () {
-              onItemSelected('Audit Trails') ;
-            },
-          ),
+          // ListTile(
+          //   leading: Icon(Icons.person),
+          //   title: Text('Profile'),
+          //   selected: selectedItem == 'Editable',
+          //   onTap: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (context) => ProfilePage(),
+          //       ),
+          //     );
+          //   },
+          // ),
           Divider(),
           ListTile(
             leading: Icon(Icons.logout),

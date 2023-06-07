@@ -2,18 +2,52 @@ import 'package:flutter/material.dart';
 import 'package:flutterapp/Screens/Visits.dart';
 import 'package:flutterapp/Screens/pricePoints.dart';
 import 'package:flutterapp/Screens/patientRegi.dart';
-import 'package:flutterapp/Screens/Visits.dart';
+import 'dart:convert';
+import 'package:flutterapp/Services/globals.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'lineChart.dart';
 import 'sidebar.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int totalVisits = 0;
+  int totalRegistrations = 0;
+
+
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    final response = await http.get(Uri.parse('http://sofia.onedoc.ph:8000/api/dashboard'));
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+
+      totalRegistrations = data['totalRegistrations'];
+      totalVisits = data['totalVisits'];
+
+      setState(() {}); // Update the UI with the fetched data
+    } else {
+      // Handle API error
+      print('API request failed with status code: ${response.statusCode}');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: const Text('ame || Dashboard'),
         backgroundColor: Color.fromRGBO(72, 109, 218, 1),
       ),
       drawer: Sidebar(
@@ -78,10 +112,13 @@ class HomeScreen extends StatelessWidget {
                                   fontSize: 20.0
                                 ),),
                                 SizedBox(height: 5.0),
-                                Text("66 Total Patients", style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w400
-                                ),)
+                                Text(
+                                  "$totalRegistrations Total Visits",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -120,10 +157,13 @@ class HomeScreen extends StatelessWidget {
                                     fontSize: 20.0
                                 ),),
                                 SizedBox(height: 5.0),
-                                Text("140 Total Visits", style: TextStyle(
+                                Text(
+                                  "$totalVisits Total Visits",
+                                  style: TextStyle(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.w400
-                                ),)
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
